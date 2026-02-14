@@ -1,0 +1,141 @@
+export const UNITS = [
+
+  // ===== CLUSTER 1 – BASIS =====
+
+  {
+    id: "u01_eddie",
+    order: 1,
+    title: "Eddie ist da",
+    token: "concept_eddie",
+    hooks: [],
+    base: {
+      discover: "Das ist Eddie.",
+      transfer: "Das ist Eddie.",
+      maintain: "Das ist Eddie."
+    }
+  },
+
+  {
+    id: "u02_tisch",
+    order: 2,
+    title: "Der Tisch",
+    token: "noun_tisch",
+    hooks: ["concept_eddie"],
+    base: {
+      discover: "Das ist der Tisch.",
+      transfer: "Der Tisch.",
+      maintain: "Das ist der Tisch."
+    }
+  },
+
+  {
+    id: "u03_stuhl",
+    order: 3,
+    title: "Der Stuhl",
+    token: "noun_stuhl",
+    hooks: ["noun_tisch"],
+    base: {
+      discover: "Das ist der Stuhl.",
+      transfer: "Der Stuhl ist am Tisch.",
+      maintain: "Das ist der Stuhl."
+    }
+  },
+
+  {
+    id: "u04_sitzen",
+    order: 4,
+    title: "Sitzen",
+    token: "verb_sitzen",
+    hooks: ["noun_stuhl"],
+    base: {
+      discover: "Eddie sitzt.",
+      transfer: "Ich sitze am Tisch.",
+      maintain: "Eddie sitzt."
+    }
+  },
+
+  // ===== CLUSTER 2 – RAUM & LICHT =====
+
+  {
+    id: "u05_lampe",
+    order: 5,
+    title: "Die Lampe",
+    token: "noun_lampe",
+    hooks: ["noun_tisch"],
+    base: {
+      discover: "Das ist die Lampe.",
+      transfer: "Die Lampe ist über dem Tisch.",
+      maintain: "Das ist die Lampe."
+    }
+  },
+
+  {
+    id: "u06_licht",
+    order: 6,
+    title: "An und Aus",
+    token: "concept_licht",
+    hooks: ["noun_lampe"],
+    base: {
+      discover: "Die Lampe ist an.",
+      transfer: "Die Lampe ist an oder aus.",
+      maintain: "Die Lampe ist an."
+    }
+  },
+
+  // ===== CLUSTER 3 – VERGLEICH =====
+
+  {
+    id: "u07_gross_klein",
+    order: 7,
+    title: "Groß und Klein",
+    token: "concept_groesse",
+    hooks: ["noun_tisch"],
+    base: {
+      discover: "Der Tisch ist groß.",
+      transfer: "Der Tisch ist groß. Der Stuhl ist klein.",
+      maintain: "Der Tisch ist groß."
+    }
+  },
+
+  {
+    id: "u08_auf_unter",
+    order: 8,
+    title: "Auf und Unter",
+    token: "prep_position",
+    hooks: ["noun_tisch"],
+    base: {
+      discover: "Eddie ist auf dem Tisch.",
+      transfer: "Eddie ist auf oder unter dem Tisch.",
+      maintain: "Eddie ist auf dem Tisch."
+    }
+  },
+
+  // ===== CLUSTER 4 – IDENTITÄT =====
+
+  {
+    id: "u09_mein",
+    order: 9,
+    title: "Mein Platz",
+    token: "possessiv_mein",
+    hooks: ["noun_stuhl"],
+    base: {
+      discover: "Das ist mein Platz.",
+      transfer: "Das ist mein Platz am Tisch.",
+      maintain: "Das ist mein Platz."
+    }
+  },
+
+  {
+    id: "u10_wir",
+    order: 10,
+    title: "Wir sind hier",
+    token: "concept_wir",
+    hooks: ["concept_eddie"],
+    base: {
+      discover: "Wir sind hier.",
+      transfer: "Wir sind hier am Tisch.",
+      maintain: "Wir sind hier."
+    }
+  }
+
+];
