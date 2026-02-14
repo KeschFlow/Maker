@@ -6,15 +6,17 @@ body { font-family: system-ui, sans-serif; margin:0; height:100vh; background:#0
 #start-circle { width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; margin: 2rem 0; transition: all 0.3s ease; }
 #start-circle.listening { border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
 #start-circle.active { background: #fff; transform: scale(1.1); }
-#gate-prompt { font-size: 1.2rem; color: #ccc; text-transform: uppercase; letter-spacing: 0.1em; }
+#gate-prompt { font-size: 1.4rem; color: #ccc; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+
+.big-start { font-size: 2.5rem !important; padding: 1.5rem 3rem !important; margin-top: 2rem; }
 
 #app { width:100%; max-width:800px; padding:2rem; background:white; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.5); text-align:center; box-sizing: border-box; }
 .hidden { display: none !important; }
 
 .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
-.pill { background: #f0f0f0; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; transition: background 0.2s; }
+.pill { background: #f0f0f0; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 2.5rem; letter-spacing: 0.05em; transition: background 0.2s; }
 .pill:hover { background: #e0e0e0; }
-.pill.danger { background: #fff0f0; color: #d00; }
+.pill.danger { background: #fff0f0; color: #d00; font-size: 1.5rem; }
 .pill.danger:hover { background: #fee; }
 
 #core-display { margin-bottom:2rem; }
