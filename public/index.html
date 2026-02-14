@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAKER</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="app">
+
+    <!-- START SCREEN -->
+    <div id="startScreen" class="center">
+      <h1>MAKER</h1>
+      <p>Sag oder tippe: <strong>START</strong></p>
+      <div class="controls">
+        <button id="startBtn">▶</button>
+        <button id="stopBtn">■</button>
+      </div>
+    </div>
+
+    <!-- UNIT SCREEN -->
+    <div id="unitScreen" class="hidden">
+      <h2 id="unitTitle"></h2>
+      <div id="unitContent"></div>
+    </div>
+
+  </div>
+
+  <script src="types.js"></script>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
