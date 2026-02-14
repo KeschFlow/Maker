@@ -41,12 +41,12 @@ class MakerFlowEngine {
       diagnostic: document.getElementById("diagnostic")
     };
 
-    // iOS hint (hidden by default; app.css can style this if desired)
+    // iOS hint (hidden by default)
     this.el.iosHint.id = "ios-hint";
     this.el.iosHint.textContent = "Für beste Spracherkennung: Chrome verwenden.";
     this.el.iosHint.style.display = "none";
     const coreDisplay = document.getElementById("core-display");
-    if (coreDisplay) {
+    if (coreDisplay && this.el.app) {
       this.el.app.insertBefore(this.el.iosHint, coreDisplay);
     }
 
@@ -68,19 +68,19 @@ class MakerFlowEngine {
   }
 
   async init() {
-    // Always show a screen first (prevents black screen)
+    // Prevent black screen: always show gate first
     this.showGate();
 
-    // Bind UI early so tap-fallback always works
+    // Bind UI early so tap fallback always works
     this.bindUI();
     this.setupSpeech();
     this.syncModeButtons();
 
-    // Load curriculum (robust)
+    // Load curriculum safely
     const ok = await this.loadCurriculumSafe();
     if (!ok) return;
 
-    // Gate speech: say "Start" (optional, never blocks)
+    // Optional gate speech ("Start"), never blocks
     this.startGateSpeech();
   }
 
@@ -95,7 +95,7 @@ class MakerFlowEngine {
       if (!resp.ok) throw new Error("HTTP " + resp.status);
       const data = await resp.json();
 
-      // Minimal shape check (defensive)
+      // Minimal shape check
       if (!data || !Array.isArray(data.modules)) {
         throw new Error("Invalid curriculum shape");
       }
@@ -103,19 +103,13 @@ class MakerFlowEngine {
       this.curriculum = data;
       return true;
     } catch (err) {
-      // Keep UI linear: show gate + clear instruction to use tap fallback
-      if (this.el.gatePrompt) {
-        this.el.gatePrompt.textContent = "Fehler beim Laden. Tippe Start.";
-      }
-      if (this.el.feedback) {
-        this.el.feedback.textContent = "";
-      }
+      // Keep linear UX: show gate + tap fallback
+      if (this.el.gatePrompt) this.el.gatePrompt.textContent = "Fehler beim Laden. Tippe Start.";
       if (this.el.diagnostic) {
         this.el.diagnostic.style.display = "block";
         this.el.diagnostic.textContent =
           "Curriculum konnte nicht geladen werden (offline/404/JSON). Bitte neu laden oder später erneut versuchen.";
       }
-      // Do not throw; prevents total blank
       return false;
     }
   }
@@ -124,13 +118,11 @@ class MakerFlowEngine {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
 
-    // Gate recognition (Start)
     this.gateRecognition = new SR();
     this.gateRecognition.lang = "de-DE";
     this.gateRecognition.continuous = false;
     this.gateRecognition.interimResults = false;
 
-    // In-app recognition (vocal tasks)
     this.recognition = new SR();
     this.recognition.lang = "de-DE";
     this.recognition.continuous = false;
@@ -139,41 +131,33 @@ class MakerFlowEngine {
 
   startGateSpeech() {
     if (!this.gateRecognition) return;
-
-    // Only run while gate is visible
     if (!this.el.gate || this.el.gate.classList.contains("hidden")) return;
 
     try {
       this.gateRecognition.onresult = (e) => {
         const txt = (e.results?.[0]?.[0]?.transcript || "").toLowerCase().trim();
-        // Accept common variants
         if (txt.includes("start") || txt.includes("los")) {
           this.startApp();
         } else {
-          // Keep it short + action-oriented
           if (this.el.gatePrompt) this.el.gatePrompt.textContent = "Sag „Start“ oder tippe";
         }
       };
 
       this.gateRecognition.onerror = () => {
-        // Never block; tap fallback remains
         if (this.el.gatePrompt) this.el.gatePrompt.textContent = "Tippe Start";
       };
 
       this.gateRecognition.onend = () => {
-        // Soft-retry while gate is visible (no busy loop)
         if (this.el.gate && !this.el.gate.classList.contains("hidden")) {
           setTimeout(() => {
-            try {
-              this.gateRecognition.start();
-            } catch {}
+            try { this.gateRecognition.start(); } catch {}
           }, 800);
         }
       };
 
       this.gateRecognition.start();
     } catch {
-      // Ignore; tap fallback
+      // Tap fallback remains
     }
   }
 
@@ -199,7 +183,7 @@ class MakerFlowEngine {
       };
     }
 
-    // Tap fallbacks (linear, no menus)
+    // Tap fallbacks (linear)
     if (this.el.gateFallbackBtn) this.el.gateFallbackBtn.onclick = () => this.startApp();
     if (this.el.startCircle) this.el.startCircle.onclick = () => this.startApp();
     if (this.el.gatePrompt) this.el.gatePrompt.onclick = () => this.startApp();
@@ -259,11 +243,8 @@ class MakerFlowEngine {
 
     const unit = units[this.state.progress.currentUnitIndex];
     const layer = unit?.mode_layer?.[this.state.mode];
-
-    // Defensive: if mode layer missing, fall back to transfer/discover
     const fallbackLayer =
       unit?.mode_layer?.transfer || unit?.mode_layer?.discover || unit?.mode_layer?.maintain;
-
     const activeLayer = layer || fallbackLayer;
 
     const focusWord = unit?.universal_core?.focus_word || "—";
