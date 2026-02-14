@@ -1,0 +1,35 @@
+body { font-family: system-ui, sans-serif; margin:0; height:100vh; background:#000; display:flex; align-items:center; justify-content:center; color: #111; overflow: hidden;}
+
+#gatekeeper { position: fixed; inset: 0; background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+.brand { font-size: 2.5rem; letter-spacing: 0.2em; font-weight: 900; margin-bottom: 0.5rem; }
+.sub-brand { font-size: 1rem; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3rem; }
+#start-circle { width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; margin: 2rem 0; transition: all 0.3s ease; }
+#start-circle.listening { border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+#start-circle.active { background: #fff; transform: scale(1.1); }
+#gate-prompt { font-size: 1.2rem; color: #ccc; text-transform: uppercase; letter-spacing: 0.1em; }
+
+#app { width:100%; max-width:800px; padding:2rem; background:white; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.5); text-align:center; box-sizing: border-box; }
+.hidden { display: none !important; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
+.pill { background: #f0f0f0; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; transition: background 0.2s; }
+.pill:hover { background: #e0e0e0; }
+.pill.danger { background: #fff0f0; color: #d00; }
+.pill.danger:hover { background: #fee; }
+
+#core-display { margin-bottom:2rem; }
+#concept-image { width:260px; height:260px; margin:0 auto; background:#f8f8f8; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; border: 1px solid #eee; }
+#concept-image svg { width: 200px; height: 200px; }
+#concept-image span { font-size: 1.2rem; margin-top: 10px; color: #555; }
+#focus-word { font-size:3.5rem; margin:1.5rem 0 0.5rem 0; font-weight:900; letter-spacing: 0.05em;}
+#prompt { font-size:1.8rem; margin:1rem 0 2rem 0; color: #444; }
+
+#interaction-area { min-height:100px; display:flex; justify-content:center; gap:30px; flex-wrap:wrap; }
+.clickable { width:220px; height:220px; background:#111; color:#fff; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2.2rem; cursor:pointer; font-weight: 700; transition: transform 0.1s; user-select:none; }
+.clickable:active { transform: scale(0.95); }
+.cog-btn { min-width:220px; min-height:120px; font-size: 2rem; padding: 2rem 4rem; border-radius: 16px; border: none; background: #eee; cursor: pointer; font-weight: bold; margin: 10px; }
+#mic-button { font-size:1.8rem; padding:1.5rem 4rem; margin:2rem auto; display: block; border-radius: 16px; border: 3px solid #111; background: #fff; color: #111; cursor:pointer; font-weight: bold; }
+
+#feedback { font-size:1.6rem; margin:1.5rem 0; min-height:2rem; font-weight:bold; color: #111; }
+#diagnostic { font-size:1.4rem; color:#d00; background:#fff0f0; padding:2rem; border-radius:16px; margin-top: 1rem; font-weight: bold; border: 1px solid #fcc; }
+#ios-hint { font-size:1.2rem; background:#fffbe6; padding:1.5rem; border-radius:12px; margin:1rem; border:1px solid #ffe58f; display:none; }
