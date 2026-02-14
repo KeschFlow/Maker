@@ -19,7 +19,20 @@
             "maintain": { "task_type": "cognitive", "prompt": "Wo bist du?", "expected_answer": true }
           }
         },
-        // ... (die restlichen 11 Units aus m01 – füge sie aus deiner Datei ein)
+        {
+          "unit_id": "u02",
+          "cluster": "wahrnehmen",
+          "concept": "boden",
+          "universal_core": {
+            "focus_word": "Boden",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='70' width='100' height='30' fill='none' stroke='black' stroke-width='8'/><line x1='0' y1='70' x2='100' y2='70' stroke='black' stroke-width='8'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Boden.", "target_element_id": "boden" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Boden." },
+            "maintain": { "task_type": "cognitive", "prompt": "Ist das der Boden?", "expected_answer": true }
+          }
+        },
         {
           "unit_id": "u03",
           "cluster": "wahrnehmen",
@@ -33,15 +46,295 @@
             "transfer": { "task_type": "vocal", "prompt": "Sag: Tisch." },
             "maintain": { "task_type": "cognitive", "prompt": "Ist das ein Tisch?", "expected_answer": true }
           }
+        },
+        {
+          "unit_id": "u04",
+          "cluster": "wahrnehmen",
+          "concept": "stuhl",
+          "universal_core": {
+            "focus_word": "Stuhl",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='30' y='30' width='40' height='10' fill='none' stroke='black' stroke-width='7'/><rect x='30' y='40' width='40' height='30' fill='none' stroke='black' stroke-width='7'/><rect x='35' y='70' width='10' height='25' fill='none' stroke='black' stroke-width='7'/><rect x='55' y='70' width='10' height='25' fill='none' stroke='black' stroke-width='7'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Stuhl.", "target_element_id": "stuhl" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Stuhl." },
+            "maintain": { "task_type": "cognitive", "prompt": "Ist das ein Stuhl?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u05",
+          "cluster": "wahrnehmen",
+          "concept": "lampe",
+          "universal_core": {
+            "focus_word": "Lampe",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='30' r='15' fill='none' stroke='black' stroke-width='7'/><line x1='50' y1='45' x2='50' y2='80' stroke='black' stroke-width='8'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf die Lampe.", "target_element_id": "lampe" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Lampe." },
+            "maintain": { "task_type": "cognitive", "prompt": "Gibt das Licht?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u06",
+          "cluster": "wahrnehmen",
+          "concept": "tür",
+          "universal_core": {
+            "focus_word": "Tür",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='20' y='10' width='60' height='80' fill='none' stroke='black' stroke-width='8'/><circle cx='70' cy='50' r='5' fill='black'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf die Tür.", "target_element_id": "tür" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Tür." },
+            "maintain": { "task_type": "cognitive", "prompt": "Geht man durch eine Tür?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u07",
+          "cluster": "wahrnehmen",
+          "concept": "fenster",
+          "universal_core": {
+            "focus_word": "Fenster",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='20' y='20' width='60' height='60' fill='none' stroke='black' stroke-width='8'/><line x1='50' y1='20' x2='50' y2='80' stroke='black' stroke-width='8'/><line x1='20' y1='50' x2='80' y2='50' stroke='black' stroke-width='8'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf das Fenster.", "target_element_id": "fenster" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Fenster." },
+            "maintain": { "task_type": "cognitive", "prompt": "Schaut man durch ein Fenster?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u08",
+          "cluster": "wahrnehmen",
+          "concept": "wand",
+          "universal_core": {
+            "focus_word": "Wand",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='10' y='10' width='80' height='80' fill='none' stroke='black' stroke-width='10'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf die Wand.", "target_element_id": "wand" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Wand." },
+            "maintain": { "task_type": "cognitive", "prompt": "Ist das eine Wand?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u09",
+          "cluster": "wahrnehmen",
+          "concept": "decke",
+          "universal_core": {
+            "focus_word": "Decke",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='20' width='100' height='30' fill='none' stroke='black' stroke-width='8'/><line x1='0' y1='20' x2='100' y2='20' stroke='black' stroke-width='8'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige nach oben zur Decke.", "target_element_id": "decke" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Decke." },
+            "maintain": { "task_type": "cognitive", "prompt": "Ist das die Decke?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u10",
+          "cluster": "wahrnehmen",
+          "concept": "ecke",
+          "universal_core": {
+            "focus_word": "Ecke",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><path d='M20 20 L20 80 L80 80' fill='none' stroke='black' stroke-width='10'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf die Ecke.", "target_element_id": "ecke" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Ecke." },
+            "maintain": { "task_type": "cognitive", "prompt": "Wo treffen sich zwei Wände?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u11",
+          "cluster": "wahrnehmen",
+          "concept": "mitte",
+          "universal_core": {
+            "focus_word": "Mitte",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='15' fill='none' stroke='black' stroke-width='8'/><rect x='10' y='10' width='80' height='80' fill='none' stroke='black' stroke-width='4' stroke-dasharray='5,5'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige in die Mitte des Raums.", "target_element_id": "mitte" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Mitte." },
+            "maintain": { "task_type": "cognitive", "prompt": "Ist das die Mitte?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u12",
+          "cluster": "wahrnehmen",
+          "concept": "links",
+          "universal_core": {
+            "focus_word": "Links",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='8' refY='3' orient='auto'><path d='M0,0 L0,6 L9,3 z' fill='black'/></marker></defs><path d='M70 20 L30 50 L70 80' fill='none' stroke='black' stroke-width='10' marker-end='url(#arrow)'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige nach links.", "target_element_id": "links" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Links." },
+            "maintain": { "task_type": "cognitive", "prompt": "Ist das links?", "expected_answer": true }
+          }
         }
-        // ... restliche Units
       ]
     },
     {
       "mod_id": "m02_werkzeuge",
       "title": "Werkzeuge & Handlung",
       "units": [
-        // deine 12 Units hier einfügen
+        {
+          "unit_id": "u01",
+          "concept": "hammer",
+          "universal_core": {
+            "focus_word": "Hammer",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='30' y='10' width='40' height='30' fill='none' stroke='black' stroke-width='9'/><rect x='42' y='40' width='16' height='50' fill='none' stroke='black' stroke-width='9'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Hammer.", "target_element_id": "hammer" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Hammer." },
+            "maintain": { "task_type": "cognitive", "prompt": "Schlägt man mit einem Hammer?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u02",
+          "concept": "schraubendreher",
+          "universal_core": {
+            "focus_word": "Schraubendreher",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='45' y='10' width='10' height='30' fill='none' stroke='black' stroke-width='8'/><line x1='50' y1='40' x2='50' y2='90' stroke='black' stroke-width='10'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Schraubendreher.", "target_element_id": "schraubendreher" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Schraubendreher." },
+            "maintain": { "task_type": "cognitive", "prompt": "Dreht man Schrauben damit?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u03",
+          "concept": "zange",
+          "universal_core": {
+            "focus_word": "Zange",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><path d='M30 20 L50 50 L30 80' fill='none' stroke='black' stroke-width='9'/><path d='M70 20 L50 50 L70 80' fill='none' stroke='black' stroke-width='9'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf die Zange.", "target_element_id": "zange" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Zange." },
+            "maintain": { "task_type": "cognitive", "prompt": "Greift man damit?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u04",
+          "concept": "säge",
+          "universal_core": {
+            "focus_word": "Säge",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='20' y='40' width='60' height='15' fill='none' stroke='black' stroke-width='8'/><path d='M20 55 L30 65 L40 55 L50 65 L60 55 L70 65 L80 55' fill='none' stroke='black' stroke-width='6'/><rect x='75' y='35' width='10' height='30' fill='none' stroke='black' stroke-width='8'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf die Säge.", "target_element_id": "säge" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Säge." },
+            "maintain": { "task_type": "cognitive", "prompt": "Schneidet man damit?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u05",
+          "concept": "schere",
+          "universal_core": {
+            "focus_word": "Schere",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='35' cy='30' r='12' fill='none' stroke='black' stroke-width='8'/><circle cx='35' cy='70' r='12' fill='none' stroke='black' stroke-width='8'/><line x1='35' y1='42' x2='65' y2='70' stroke='black' stroke-width='9'/><line x1='35' y1='58' x2='65' y2='30' stroke='black' stroke-width='9'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf die Schere.", "target_element_id": "schere" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Schere." },
+            "maintain": { "task_type": "cognitive", "prompt": "Schneidet man Papier damit?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u06",
+          "concept": "pinsel",
+          "universal_core": {
+            "focus_word": "Pinsel",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='45' y='10' width='10' height='40' fill='none' stroke='black' stroke-width='8'/><path d='M35 50 Q50 70 65 50' fill='none' stroke='black' stroke-width='12'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Pinsel.", "target_element_id": "pinsel" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Pinsel." },
+            "maintain": { "task_type": "cognitive", "prompt": "Malt man damit?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u07",
+          "concept": "schraube",
+          "universal_core": {
+            "focus_word": "Schraube",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='40' y='20' width='20' height='15' fill='none' stroke='black' stroke-width='8'/><circle cx='50' cy='50' r='12' fill='none' stroke='black' stroke-width='10'/><line x1='50' y1='62' x2='50' y2='90' stroke='black' stroke-width='10'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf die Schraube.", "target_element_id": "schraube" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Schraube." },
+            "maintain": { "task_type": "cognitive", "prompt": "Wird eine Schraube gedreht?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u08",
+          "concept": "nagel",
+          "universal_core": {
+            "focus_word": "Nagel",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='45' y='20' width='10' height='20' fill='none' stroke='black' stroke-width='8'/><circle cx='50' cy='45' r='10' fill='none' stroke='black' stroke-width='8'/><line x1='50' y1='55' x2='50' y2='90' stroke='black' stroke-width='8'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Nagel.", "target_element_id": "nagel" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Nagel." },
+            "maintain": { "task_type": "cognitive", "prompt": "Schlägt man einen Nagel ein?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u09",
+          "concept": "lineal",
+          "universal_core": {
+            "focus_word": "Lineal",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='15' y='40' width='70' height='20' fill='none' stroke='black' stroke-width='9'/><line x1='20' y1='40' x2='20' y2='60' stroke='black' stroke-width='6'/><line x1='40' y1='40' x2='40' y2='60' stroke='black' stroke-width='6'/><line x1='60' y1='40' x2='60' y2='60' stroke='black' stroke-width='6'/><line x1='80' y1='40' x2='80' y2='60' stroke='black' stroke-width='6'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf das Lineal.", "target_element_id": "lineal" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Lineal." },
+            "maintain": { "task_type": "cognitive", "prompt": "Misst man Längen damit?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u10",
+          "concept": "kleber",
+          "universal_core": {
+            "focus_word": "Kleber",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='35' y='20' width='30' height='50' fill='none' stroke='black' stroke-width='9'/><path d='M35 70 Q50 90 65 70' fill='none' stroke='black' stroke-width='9'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Kleber.", "target_element_id": "kleber" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Kleber." },
+            "maintain": { "task_type": "cognitive", "prompt": "Verbindet Kleber Dinge?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u11",
+          "concept": "eimer",
+          "universal_core": {
+            "focus_word": "Eimer",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><path d='M20 30 L20 80 Q20 90 30 90 L70 90 Q80 90 80 80 L80 30' fill='none' stroke='black' stroke-width='9'/><line x1='30' y1='30' x2='70' y2='30' stroke='black' stroke-width='9'/><rect x='45' y='15' width='10' height='20' fill='none' stroke='black' stroke-width='8'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Eimer.", "target_element_id": "eimer" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Eimer." },
+            "maintain": { "task_type": "cognitive", "prompt": "Trägt man Wasser damit?", "expected_answer": true }
+          }
+        },
+        {
+          "unit_id": "u12",
+          "concept": "bleistift",
+          "universal_core": {
+            "focus_word": "Bleistift",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='45' y='20' width='10' height='60' fill='none' stroke='black' stroke-width='8'/><path d='M40 80 L50 90 L60 80' fill='none' stroke='black' stroke-width='8'/></svg>"
+          },
+          "mode_layer": {
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Bleistift.", "target_element_id": "bleistift" },
+            "transfer": { "task_type": "vocal", "prompt": "Sag: Bleistift." },
+            "maintain": { "task_type": "cognitive", "prompt": "Schreibt man damit?", "expected_answer": true }
+          }
+        }
       ]
     }
   ]
