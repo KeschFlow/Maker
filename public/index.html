@@ -3,34 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MAKER</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>MAKER – Polytechnische Einheitsschule</title>
+
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./app.css" />
 </head>
 <body>
 
-  <div id="app">
+  <div id="gatekeeper" class="hidden">
+    <div class="brand">MAKER</div>
+    <div class="sub-brand">Polytechnische Einheitsschule</div>
 
-    <!-- START SCREEN -->
-    <div id="startScreen" class="center">
-      <h1>MAKER</h1>
-      <p>Sag oder tippe: <strong>START</strong></p>
-      <div class="controls">
-        <button id="startBtn">▶</button>
-        <button id="stopBtn">■</button>
-      </div>
-    </div>
+    <button id="mode-btn-gate" class="pill mode-btn">MODE: TRANSFER</button>
 
-    <!-- UNIT SCREEN -->
-    <div id="unitScreen" class="hidden">
-      <h2 id="unitTitle"></h2>
-      <div id="unitContent"></div>
-    </div>
+    <div id="start-circle"></div>
+    <div id="gate-prompt">Kommando: Start</div>
 
+    <button id="gate-fallback-btn" style="display:none; margin-top: 30px;" class="pill">
+      Tippen (Fallback)
+    </button>
   </div>
 
-  <!-- WICHTIG: Pfade auf /core korrigiert -->
-  <script src="core/types.js"></script>
-  <script src="core/engine.js"></script>
-  <script src="app.js"></script>
+  <div id="app" class="hidden">
+    <div class="topbar">
+      <button id="mode-btn-app" class="pill mode-btn">MODE: TRANSFER</button>
+      <button id="reset-btn" class="pill danger">Reset DB</button>
+    </div>
+
+    <div id="core-display">
+      <div id="concept-image"></div>
+      <div id="focus-word"></div>
+    </div>
+
+    <div id="prompt"></div>
+
+    <div id="interaction-area"></div>
+    <button id="mic-button" style="display:none;">🎤 Sprechen</button>
+
+    <div id="feedback"></div>
+    <div id="diagnostic" style="display:none;"></div>
+  </div>
+
+  <script src="./app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js");
+    }
+  </script>
 </body>
 </html>
