@@ -6,29 +6,68 @@
   <title>MAKER – Polytechnische Einheitsschule</title>
 
   <meta name="theme-color" content="#000000" />
+
+  <!-- PWA -->
   <link rel="manifest" href="./manifest.json" />
+
+  <!-- iOS PWA basics (no external deps; optional icons can be added later) -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <link rel="stylesheet" href="./app.css" />
 </head>
 <body>
 
-  <div id="gatekeeper" class="hidden">
+  <noscript>
+    <div style="padding:16px; font-family: system-ui, sans-serif; line-height:1.4;">
+      <strong>MAKER braucht JavaScript.</strong><br />
+      Bitte aktiviere JavaScript oder öffne die App in einem Browser, der es unterstützt.
+    </div>
+  </noscript>
+
+  <div id="gatekeeper" class="hidden" aria-live="polite">
     <div class="brand">MAKER</div>
     <div class="sub-brand">Polytechnische Einheitsschule</div>
 
-    <button id="mode-btn-gate" class="pill mode-btn">🌍</button>
+    <button
+      id="mode-btn-gate"
+      class="pill mode-btn"
+      type="button"
+      aria-label="Modus wechseln"
+      title="Modus"
+    >🌍</button>
 
-    <div id="start-circle"></div>
+    <div id="start-circle" aria-hidden="true"></div>
     <div id="gate-prompt">Sag „Start“ oder tippe</div>
 
-    <button id="gate-fallback-btn" class="pill big-start">
+    <button
+      id="gate-fallback-btn"
+      class="pill big-start"
+      type="button"
+      aria-label="Start"
+      title="Start"
+    >
       👆 Start
     </button>
   </div>
 
   <div id="app" class="hidden">
     <div class="topbar">
-      <button id="mode-btn-app" class="pill mode-btn">🌍</button>
-      <button id="reset-btn" class="pill danger">🔄 Reset</button>
+      <button
+        id="mode-btn-app"
+        class="pill mode-btn"
+        type="button"
+        aria-label="Modus wechseln"
+        title="Modus"
+      >🌍</button>
+
+      <button
+        id="reset-btn"
+        class="pill danger"
+        type="button"
+        aria-label="Zurücksetzen"
+        title="Reset"
+      >🔄 Reset</button>
     </div>
 
     <div id="core-display">
@@ -36,20 +75,49 @@
       <div id="focus-word"></div>
     </div>
 
-    <div id="prompt"></div>
+    <div id="prompt" aria-live="polite"></div>
 
     <div id="interaction-area"></div>
-    <button id="mic-button" style="display:none;">🎤 Sprechen</button>
 
-    <div id="feedback"></div>
+    <button
+      id="mic-button"
+      type="button"
+      aria-label="Sprechen"
+      title="Sprechen"
+      style="display:none;"
+    >🎤 Sprechen</button>
+
+    <div id="feedback" aria-live="polite"></div>
     <div id="diagnostic" style="display:none;"></div>
   </div>
 
   <script src="./app.js"></script>
   <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js");
-    }
+    // Service Worker: offline-first + safer update behavior
+    (function () {
+      if (!("serviceWorker" in navigator)) return;
+
+      navigator.serviceWorker.register("./sw.js", { scope: "./" })
+        .then(function (reg) {
+          // If a new SW is found, mark it and optionally reload on controllerchange
+          reg.addEventListener("updatefound", function () {
+            // You can surface this in UI later if desired (symbol-only hint)
+            // console.log("SW update found");
+          });
+        })
+        .catch(function (err) {
+          // Keep silent by default (no UI distraction), but available for debugging
+          // console.warn("SW register failed:", err);
+        });
+
+      // Optional: reload once when a new SW takes control (prevents "stuck old version")
+      var refreshed = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (refreshed) return;
+        refreshed = true;
+        // location.reload();
+      });
+    })();
   </script>
 </body>
 </html>
