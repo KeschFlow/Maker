@@ -1,289 +1,131 @@
-/* motor_ar.js
- * Zero-dep, offline-first AR thin slice.
- * Symbol-first UI: 📷 to toggle camera, ✅ to confirm (tap fallback).
- * Tier-gated via body.scanner-tier-X (>=1 enables AR layer for motor_ar tasks).
- * Comments in English by project rule.
- */
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MAKER – Polytechnische Einheitsschule</title>
 
-class MotorARLayer {
-  constructor() {
-    this.enabled = false; // tier gate
-    this.active = false;  // camera running
-    this.lastTask = null;
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark light" />
 
-    this.el = {
-      root: null,
-      video: null,
-      canvas: null,
-      ctx: null,
-      toggleBtn: null,
-      confirmBtn: null
-    };
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json" />
 
-    this.stream = null;
-    this._raf = null;
+  <!-- iOS PWA basics (no external deps) -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    this.injectStyles();
-    this.mount();
-    this.bind();
+  <!-- Optional icon placeholder (keep local if you add it later) -->
+  <!-- <link rel="icon" href="./icons/icon-192.png" /> -->
 
-    // Initial tier sync (in case body already has class)
-    this.syncTierState();
-  }
+  <link rel="stylesheet" href="./app.css" />
+</head>
 
-  injectStyles() {
-    const id = "maker-motor-ar-style";
-    if (document.getElementById(id)) return;
+<body>
+  <noscript>
+    <div style="padding:16px; font-family: system-ui, sans-serif; line-height:1.4;">
+      <strong>MAKER braucht JavaScript.</strong><br />
+      Bitte aktiviere JavaScript oder öffne die App in einem Browser, der es unterstützt.
+    </div>
+  </noscript>
 
-    const style = document.createElement("style");
-    style.id = id;
-    style.textContent = `
-      #maker-ar {
-        position: absolute;
-        inset: 0;
-        z-index: 80;
-        display: none;
-        pointer-events: none; /* only buttons handle taps */
-      }
-      #maker-ar.active { display: block; }
+  <!-- Gatekeeper (linear entry) -->
+  <div id="gatekeeper" class="hidden" aria-live="polite">
+    <div class="brand">MAKER</div>
+    <div class="sub-brand">Polytechnische Einheitsschule</div>
 
-      #maker-ar video {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+    <button
+      id="mode-btn-gate"
+      class="pill mode-btn"
+      type="button"
+      aria-label="Modus wechseln"
+      title="Modus"
+    >🌍</button>
 
-      #maker-ar .shade {
-        position: absolute;
-        inset: 0;
-        background: rgba(0,0,0,0.18);
-      }
+    <div id="start-circle" aria-hidden="true"></div>
 
-      /* Big touch targets (>=48px) */
-      #maker-ar .btn {
-        pointer-events: auto;
-        position: absolute;
-        width: 56px;
-        height: 56px;
-        border-radius: 18px;
-        border: 0;
-        background: rgba(0,0,0,0.78);
-        color: #fff;
-        font-size: 22px;
-        line-height: 56px;
-        text-align: center;
-        user-select: none;
-        -webkit-user-select: none;
-      }
-      #maker-ar .btn:active { transform: scale(0.98); }
+    <div id="gate-prompt" role="button" tabindex="0">Sag „Start“ oder tippe</div>
 
-      #maker-ar .toggle { right: 12px; bottom: 12px; }
-      #maker-ar .confirm { left: 12px; bottom: 12px; }
+    <button
+      id="gate-fallback-btn"
+      class="pill big-start"
+      type="button"
+      aria-label="Start"
+      title="Start"
+    >
+      👆 Start
+    </button>
+  </div>
 
-      @media (prefers-reduced-motion: reduce) {
-        #maker-ar .btn:active { transform: none; }
-      }
-    `;
-    document.head.appendChild(style);
-  }
+  <!-- App shell (AR layer mounts inside #app by motor_ar.js) -->
+  <div id="app" class="hidden">
+    <div class="topbar">
+      <button
+        id="mode-btn-app"
+        class="pill mode-btn"
+        type="button"
+        aria-label="Modus wechseln"
+        title="Modus"
+      >🌍</button>
 
-  mount() {
-    const app = document.getElementById("app");
-    if (!app) return;
+      <button
+        id="reset-btn"
+        class="pill danger"
+        type="button"
+        aria-label="Zurücksetzen"
+        title="Reset"
+      >🔄 Reset</button>
+    </div>
 
-    // Ensure positioning context
-    const appStyle = window.getComputedStyle(app);
-    if (appStyle.position === "static") app.style.position = "relative";
+    <div id="core-display">
+      <div id="concept-image"></div>
+      <div id="focus-word"></div>
+    </div>
 
-    const root = document.createElement("div");
-    root.id = "maker-ar";
+    <div id="prompt" aria-live="polite"></div>
 
-    const video = document.createElement("video");
-    video.setAttribute("playsinline", "true");
-    video.muted = true;
-    video.autoplay = true;
+    <div id="interaction-area"></div>
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    <button
+      id="mic-button"
+      type="button"
+      aria-label="Sprechen"
+      title="Sprechen"
+      style="display:none;"
+    >🎤 Sprechen</button>
 
-    const shade = document.createElement("div");
-    shade.className = "shade";
+    <div id="feedback" aria-live="polite"></div>
+    <div id="diagnostic" style="display:none;"></div>
+  </div>
 
-    const toggleBtn = document.createElement("button");
-    toggleBtn.className = "btn toggle";
-    toggleBtn.type = "button";
-    toggleBtn.textContent = "📷";
-    toggleBtn.setAttribute("aria-label", "Scanner");
+  <!-- ✅ Script order is CRITICAL -->
+  <script src="./app.js"></script>
+  <script src="./motor_ar.js"></script>
 
-    const confirmBtn = document.createElement("button");
-    confirmBtn.className = "btn confirm";
-    confirmBtn.type = "button";
-    confirmBtn.textContent = "✅";
-    confirmBtn.setAttribute("aria-label", "Fertig");
+  <script>
+    // sw-register.js (inline): offline-first + update-safe behavior
+    // Comments in English by project rule.
+    (function () {
+      if (!("serviceWorker" in navigator)) return;
 
-    root.appendChild(video);
-    root.appendChild(canvas);
-    root.appendChild(shade);
-    root.appendChild(toggleBtn);
-    root.appendChild(confirmBtn);
+      // Register with explicit scope for GitHub Pages /public root
+      navigator.serviceWorker.register("./sw.js", { scope: "./" })
+        .then(function (reg) {
+          // If SW updates, the new one will take control after skipWaiting+claim
+          // We rely on controllerchange to reload once.
+        })
+        .catch(function () {
+          // Silent by default (no UI distraction)
+        });
 
-    app.appendChild(root);
-
-    this.el.root = root;
-    this.el.video = video;
-    this.el.canvas = canvas;
-    this.el.ctx = ctx;
-    this.el.toggleBtn = toggleBtn;
-    this.el.confirmBtn = confirmBtn;
-  }
-
-  bind() {
-    // Receive tasks from engine
-    window.addEventListener("maker:task", (e) => {
-      this.lastTask = e?.detail || null;
-      this.syncTierState(this.lastTask?.scannerTier);
-      this.syncTask(this.lastTask);
-    });
-
-    // Tier drift safety (in case only body classes change)
-    this._tierPoll = setInterval(() => this.syncTierState(), 1200);
-
-    // Controls
-    this.el.toggleBtn?.addEventListener("click", () => {
-      if (!this.enabled) return;
-      if (this.active) this.stop();
-      else this.start();
-    });
-
-    // Tap fallback always works
-    this.el.confirmBtn?.addEventListener("click", () => this.submitFound());
-
-    // Stop camera on background
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) this.stop();
-    });
-  }
-
-  getTierFromBody() {
-    const b = document.body;
-    if (!b) return 0;
-    if (b.classList.contains("scanner-tier-3")) return 3;
-    if (b.classList.contains("scanner-tier-2")) return 2;
-    if (b.classList.contains("scanner-tier-1")) return 1;
-    return 0;
-  }
-
-  syncTierState(explicitTier) {
-    const tier = typeof explicitTier === "number" ? explicitTier : this.getTierFromBody();
-    this.enabled = tier >= 1;
-
-    // If disabled: ensure hidden/stopped
-    if (!this.enabled) {
-      this.stop();
-      this.hide();
-      return;
-    }
-
-    // If enabled: show only for motor_ar tasks
-    this.syncTask(this.lastTask);
-  }
-
-  syncTask(task) {
-    const isMotorAR = task?.task_type === "motor_ar";
-
-    if (this.enabled && isMotorAR) {
-      this.show();
-      // Camera stays optional: user can press 📷, or just press ✅
-    } else {
-      this.stop();
-      this.hide();
-    }
-  }
-
-  show() {
-    this.el.root?.classList.add("active");
-  }
-
-  hide() {
-    this.el.root?.classList.remove("active");
-  }
-
-  async start() {
-    if (!this.el.video) return;
-    if (this.active) return;
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-        audio: false
+      // Reload once when the new SW takes control to avoid "stuck old version"
+      var reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (reloaded) return;
+        reloaded = true;
+        location.reload();
       });
-
-      this.stream = stream;
-      this.el.video.srcObject = stream;
-      this.active = true;
-
-      // Optional lightweight loop (no ML, no network)
-      this.startLoop();
-    } catch {
-      // Permission denied/unavailable -> user can still press ✅
-      this.active = false;
-    }
-  }
-
-  stop() {
-    this.active = false;
-    if (this._raf) cancelAnimationFrame(this._raf);
-    this._raf = null;
-
-    if (this.el.video) {
-      try { this.el.video.pause(); } catch {}
-      this.el.video.srcObject = null;
-    }
-
-    if (this.stream) {
-      try { this.stream.getTracks().forEach((t) => t.stop()); } catch {}
-      this.stream = null;
-    }
-  }
-
-  startLoop() {
-    const tick = () => {
-      if (!this.active || !this.el.video || !this.el.canvas || !this.el.ctx) return;
-
-      const v = this.el.video;
-      const w = v.videoWidth || 0;
-      const h = v.videoHeight || 0;
-
-      if (w > 0 && h > 0) {
-        // Thin slice downscale for perf
-        const targetW = 160;
-        const scale = targetW / w;
-        const targetH = Math.max(1, Math.round(h * scale));
-
-        this.el.canvas.width = targetW;
-        this.el.canvas.height = targetH;
-
-        this.el.ctx.drawImage(v, 0, 0, targetW, targetH);
-      }
-
-      this._raf = requestAnimationFrame(tick);
-    };
-
-    this._raf = requestAnimationFrame(tick);
-  }
-
-  submitFound() {
-    // If engine exists, confirm success by submitting boolean true.
-    const engine = window.makerEngine;
-    if (engine && typeof engine.submitResponse === "function") {
-      engine.submitResponse(true);
-      return;
-    }
-
-    // Fallback: no engine hook -> do nothing (keeps linear flow safe)
-  }
-}
-
-new MotorARLayer();
+    })();
+  </script>
+</body>
+</html>
