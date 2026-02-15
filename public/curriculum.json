@@ -311,15 +311,15 @@
         },
         {
           "unit_id": "u11",
-          "concept": "eimer",
+          "concept": "hammer_scan",
           "universal_core": {
-            "focus_word": "Eimer",
-            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><path d='M20 30 L20 80 Q20 90 30 90 L70 90 Q80 90 80 80 L80 30' fill='none' stroke='black' stroke-width='9'/><line x1='30' y1='30' x2='70' y2='30' stroke='black' stroke-width='9'/><rect x='45' y='15' width='10' height='20' fill='none' stroke='black' stroke-width='8'/></svg>"
+            "focus_word": "Hammer",
+            "concept_image": "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='30' y='10' width='40' height='30' fill='none' stroke='black' stroke-width='9'/><rect x='42' y='40' width='16' height='50' fill='none' stroke='black' stroke-width='9'/></svg>"
           },
           "mode_layer": {
-            "discover": { "task_type": "motor", "prompt": "Zeige auf den Eimer.", "target_element_id": "eimer" },
-            "transfer": { "task_type": "vocal", "prompt": "Sag: Eimer." },
-            "maintain": { "task_type": "cognitive", "prompt": "Trägt man Wasser damit?", "expected_answer": true }
+            "discover": { "task_type": "motor", "prompt": "Zeige auf den Hammer.", "target_element_id": "hammer" },
+            "transfer": { "task_type": "motor_ar", "prompt": "Finde 🔨. ✅", "target_element_id": "hammer" },
+            "maintain": { "task_type": "cognitive", "prompt": "Schlägt man mit einem Hammer?", "expected_answer": true }
           }
         },
         {
