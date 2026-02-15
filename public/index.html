@@ -15,9 +15,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <!-- Optional icon placeholder (keep local if you add it later) -->
-  <!-- <link rel="icon" href="./icons/icon-192.png" /> -->
-
   <link rel="stylesheet" href="./app.css" />
 </head>
 
@@ -99,8 +96,25 @@
   </div>
 
   <!-- ✅ Script order is CRITICAL -->
-  <script src="./app.js"></script>
-  <script src="./motor_ar.js"></script>
+  <script src="./app.js" defer></script>
+  <script src="./motor_ar.js" defer></script>
+
+  <script>
+    // a11y-gate.js (inline): keyboard fallback for the gate prompt
+    // Comments in English by project rule.
+    (function () {
+      var gp = document.getElementById("gate-prompt");
+      if (!gp) return;
+
+      gp.addEventListener("keydown", function (e) {
+        var k = e.key || "";
+        if (k === "Enter" || k === " " || k === "Spacebar") {
+          e.preventDefault();
+          gp.click();
+        }
+      });
+    })();
+  </script>
 
   <script>
     // sw-register.js (inline): offline-first + update-safe behavior
@@ -108,15 +122,9 @@
     (function () {
       if (!("serviceWorker" in navigator)) return;
 
-      // Register with explicit scope for GitHub Pages /public root
       navigator.serviceWorker.register("./sw.js", { scope: "./" })
-        .then(function (reg) {
-          // If SW updates, the new one will take control after skipWaiting+claim
-          // We rely on controllerchange to reload once.
-        })
-        .catch(function () {
-          // Silent by default (no UI distraction)
-        });
+        .then(function () {})
+        .catch(function () {});
 
       // Reload once when the new SW takes control to avoid "stuck old version"
       var reloaded = false;
