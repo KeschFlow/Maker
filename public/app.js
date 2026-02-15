@@ -8,15 +8,12 @@ class MakerFlowEngine {
         currentModuleIndex: 0,
         currentUnitIndex: 0,
         completedUnits: {},
-        attempts: {},
-        unlocks: {
-          scannerTier: 0 // 0..3 (milestones)
-        }
+        attempts: {}
       }
     };
 
-    // Ensure older states keep working
-    this.migrateState();
+    // Expose engine for zero-dep extensions (motor_ar.js)
+    window.makerEngine = this;
 
     this.recognition = null;
     this.gateRecognition = null;
@@ -44,19 +41,7 @@ class MakerFlowEngine {
       interaction: document.getElementById("interaction-area"),
       micBtn: document.getElementById("mic-button"),
       feedback: document.getElementById("feedback"),
-      diagnostic: document.getElementById("diagnostic"),
-      progressGlyph: null
-    };
-
-    // Gate speech anti-spam state
-    this.gateSpeech = {
-      delayMs: 900,
-      maxDelayMs: 6000,
-      lastStartAt: 0,
-      startsInWindow: 0,
-      windowStartAt: Date.now(),
-      windowMs: 60_000,
-      disabled: false
+      diagnostic: document.getElementById("diagnostic")
     };
 
     // iOS hint (hidden by default)
@@ -67,12 +52,6 @@ class MakerFlowEngine {
     if (coreDisplay && this.el.app) {
       this.el.app.insertBefore(this.el.iosHint, coreDisplay);
     }
-
-    // Inline styles for the progress glyph (no extra files)
-    this.injectProgressStyles();
-
-    // Expose engine for zero-dep AR bridge
-    window.makerEngine = this;
 
     this.init();
   }
@@ -91,172 +70,6 @@ class MakerFlowEngine {
     } catch {}
   }
 
-  migrateState() {
-    if (!this.state || typeof this.state !== "object") return;
-
-    if (!this.state.progress || typeof this.state.progress !== "object") {
-      this.state.progress = {
-        currentModuleIndex: 0,
-        currentUnitIndex: 0,
-        completedUnits: {},
-        attempts: {},
-        unlocks: { scannerTier: 0 }
-      };
-    }
-
-    if (!this.state.progress.completedUnits) this.state.progress.completedUnits = {};
-    if (!this.state.progress.attempts) this.state.progress.attempts = {};
-
-    if (!this.state.progress.unlocks || typeof this.state.progress.unlocks !== "object") {
-      this.state.progress.unlocks = { scannerTier: 0 };
-    }
-    if (typeof this.state.progress.unlocks.scannerTier !== "number") {
-      this.state.progress.unlocks.scannerTier = 0;
-    }
-
-    if (typeof this.state.progress.currentModuleIndex !== "number") this.state.progress.currentModuleIndex = 0;
-    if (typeof this.state.progress.currentUnitIndex !== "number") this.state.progress.currentUnitIndex = 0;
-
-    this.applyUnlockTierClass();
-    this.saveState();
-  }
-
-  injectProgressStyles() {
-    const id = "maker-progress-style";
-    if (document.getElementById(id)) return;
-
-    const style = document.createElement("style");
-    style.id = id;
-    style.textContent = `
-      #maker-progress {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        z-index: 50;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 10px 12px;
-        border-radius: 14px;
-        background: rgba(0,0,0,0.75);
-        color: #fff;
-        font-size: 16px;
-        line-height: 1;
-        user-select: none;
-        -webkit-user-select: none;
-      }
-      #maker-progress .slot {
-        width: 10px;
-        height: 18px;
-        border-radius: 4px;
-        background: rgba(255,255,255,0.18);
-      }
-      #maker-progress .slot.filled {
-        background: rgba(255,255,255,0.92);
-      }
-      #maker-progress.pulse {
-        animation: makerPulse 320ms ease-out 1;
-      }
-      @keyframes makerPulse {
-        0% { transform: scale(1); }
-        45% { transform: scale(1.08); }
-        100% { transform: scale(1); }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        #maker-progress.pulse { animation: none; }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  ensureProgressGlyph() {
-    if (!this.el.app) return;
-    if (this.el.progressGlyph) return;
-
-    const appStyle = window.getComputedStyle(this.el.app);
-    if (appStyle.position === "static") this.el.app.style.position = "relative";
-
-    const glyph = document.createElement("div");
-    glyph.id = "maker-progress";
-    glyph.setAttribute("aria-label", "Fortschritt");
-    glyph.setAttribute("role", "img");
-
-    // 12 slots baseline (modules can have different lengths; we fill proportionally)
-    for (let i = 0; i < 12; i++) {
-      const s = document.createElement("div");
-      s.className = "slot";
-      glyph.appendChild(s);
-    }
-
-    this.el.app.appendChild(glyph);
-    this.el.progressGlyph = glyph;
-  }
-
-  getModuleProgressCounts() {
-    const mod = this.curriculum?.modules?.[this.state.progress.currentModuleIndex];
-    const units = Array.isArray(mod?.units) ? mod.units : [];
-    const total = Math.max(1, units.length);
-
-    const modId = mod?.mod_id || "m";
-    let done = 0;
-
-    for (const u of units) {
-      const unitId = u?.unit_id || "unit";
-      const key = `${modId}:${unitId}`;
-      if (this.state.progress.completedUnits?.[key]) done += 1;
-    }
-
-    return { done, total, modId };
-  }
-
-  updateProgressUI(doPulse = false) {
-    if (!this.el.app || this.el.app.classList.contains("hidden")) return;
-    if (!this.curriculum) return;
-
-    this.ensureProgressGlyph();
-    if (!this.el.progressGlyph) return;
-
-    const { done, total } = this.getModuleProgressCounts();
-
-    const slots = Array.from(this.el.progressGlyph.querySelectorAll(".slot"));
-    const filledCount = Math.round((done / total) * slots.length);
-
-    slots.forEach((slot, idx) => {
-      if (idx < filledCount) slot.classList.add("filled");
-      else slot.classList.remove("filled");
-    });
-
-    if (doPulse) {
-      this.el.progressGlyph.classList.remove("pulse");
-      void this.el.progressGlyph.offsetWidth; // restart animation
-      this.el.progressGlyph.classList.add("pulse");
-      setTimeout(() => this.el.progressGlyph?.classList.remove("pulse"), 400);
-    }
-
-    this.updateUnlocksFromProgress(done, total);
-  }
-
-  updateUnlocksFromProgress(done, total) {
-    // Milestones: ~1/3, ~2/3, 100% per module
-    let tier = 0;
-    if (done >= Math.ceil(total * 0.34)) tier = 1;
-    if (done >= Math.ceil(total * 0.67)) tier = 2;
-    if (done >= total) tier = 3;
-
-    const prev = this.state.progress.unlocks.scannerTier || 0;
-    if (tier > prev) {
-      this.state.progress.unlocks.scannerTier = tier;
-      this.applyUnlockTierClass();
-      this.saveState();
-    }
-  }
-
-  applyUnlockTierClass() {
-    const t = this.state?.progress?.unlocks?.scannerTier ?? 0;
-    document.body.classList.remove("scanner-tier-0", "scanner-tier-1", "scanner-tier-2", "scanner-tier-3");
-    document.body.classList.add(`scanner-tier-${Math.max(0, Math.min(3, t))}`);
-  }
-
   async init() {
     // Prevent black screen: always show gate first
     this.showGate();
@@ -265,15 +78,6 @@ class MakerFlowEngine {
     this.bindUI();
     this.setupSpeech();
     this.syncModeButtons();
-
-    // Pause gate speech on tab hide (reduces permission / restart issues)
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        try { this.gateRecognition?.stop(); } catch {}
-      } else {
-        this.startGateSpeech();
-      }
-    });
 
     // Load curriculum safely
     const ok = await this.loadCurriculumSafe();
@@ -290,8 +94,7 @@ class MakerFlowEngine {
 
   async loadCurriculumSafe() {
     try {
-      // ✅ no cache-busting query; Service Worker controls caching
-      const resp = await fetch("./curriculum.json", { cache: "no-cache" });
+      const resp = await fetch("./curriculum.json?" + Date.now(), { cache: "no-store" });
       if (!resp.ok) throw new Error("HTTP " + resp.status);
       const data = await resp.json();
 
@@ -302,7 +105,7 @@ class MakerFlowEngine {
 
       this.curriculum = data;
       return true;
-    } catch {
+    } catch (err) {
       // Keep linear UX: show gate + tap fallback
       if (this.el.gatePrompt) this.el.gatePrompt.textContent = "Fehler beim Laden. Tippe Start.";
       if (this.el.diagnostic) {
@@ -329,34 +132,9 @@ class MakerFlowEngine {
     this.recognition.interimResults = false;
   }
 
-  canStartGateSpeech() {
-    if (!this.gateRecognition) return false;
-    if (!this.el.gate || this.el.gate.classList.contains("hidden")) return false;
-    if (document.hidden) return false;
-    if (this.gateSpeech.disabled) return false;
-
-    const now = Date.now();
-
-    // Sliding window limiter (anti spam)
-    if (now - this.gateSpeech.windowStartAt > this.gateSpeech.windowMs) {
-      this.gateSpeech.windowStartAt = now;
-      this.gateSpeech.startsInWindow = 0;
-    }
-    if (this.gateSpeech.startsInWindow >= 10) {
-      // too many restarts → disable speech, rely on tap fallback
-      this.gateSpeech.disabled = true;
-      if (this.el.gatePrompt) this.el.gatePrompt.textContent = "Tippe Start";
-      return false;
-    }
-
-    // Avoid tight restart loops
-    if (now - this.gateSpeech.lastStartAt < 700) return false;
-
-    return true;
-  }
-
   startGateSpeech() {
-    if (!this.canStartGateSpeech()) return;
+    if (!this.gateRecognition) return;
+    if (!this.el.gate || this.el.gate.classList.contains("hidden")) return;
 
     try {
       this.gateRecognition.onresult = (e) => {
@@ -366,32 +144,20 @@ class MakerFlowEngine {
         } else {
           if (this.el.gatePrompt) this.el.gatePrompt.textContent = "Sag „Start“ oder tippe";
         }
-        // Reset backoff on success
-        this.gateSpeech.delayMs = 900;
       };
 
       this.gateRecognition.onerror = () => {
         if (this.el.gatePrompt) this.el.gatePrompt.textContent = "Tippe Start";
-        // Increase backoff on errors
-        this.gateSpeech.delayMs = Math.min(this.gateSpeech.maxDelayMs, Math.round(this.gateSpeech.delayMs * 1.35));
       };
 
       this.gateRecognition.onend = () => {
-        if (!this.el.gate || this.el.gate.classList.contains("hidden")) return;
-        if (document.hidden) return;
-
-        setTimeout(() => {
-          if (!this.canStartGateSpeech()) return;
-          try {
-            this.gateSpeech.lastStartAt = Date.now();
-            this.gateSpeech.startsInWindow += 1;
-            this.gateRecognition.start();
-          } catch {}
-        }, this.gateSpeech.delayMs);
+        if (this.el.gate && !this.el.gate.classList.contains("hidden")) {
+          setTimeout(() => {
+            try { this.gateRecognition.start(); } catch {}
+          }, 1200);
+        }
       };
 
-      this.gateSpeech.lastStartAt = Date.now();
-      this.gateSpeech.startsInWindow += 1;
       this.gateRecognition.start();
     } catch {
       // Tap fallback remains
@@ -446,10 +212,25 @@ class MakerFlowEngine {
       this.el.iosHint.style.display = "block";
     }
 
-    // Ensure progress UI on app start
-    this.updateProgressUI(false);
-
     this.loadCurrentTask();
+  }
+
+  // Compute scanner tier from progress (simple, deterministic)
+  // Tier 0: <4 completed; Tier 1: 4-7; Tier 2: 8-11; Tier 3: 12+
+  getScannerTier() {
+    const done = Object.keys(this.state.progress.completedUnits || {}).length;
+    if (done >= 12) return 3;
+    if (done >= 8) return 2;
+    if (done >= 4) return 1;
+    return 0;
+  }
+
+  applyScannerTierClass(tier) {
+    const b = document.body;
+    if (!b) return;
+
+    b.classList.remove("scanner-tier-0", "scanner-tier-1", "scanner-tier-2", "scanner-tier-3");
+    b.classList.add(`scanner-tier-${tier}`);
   }
 
   loadCurrentTask() {
@@ -462,7 +243,6 @@ class MakerFlowEngine {
     if (!mod) {
       if (this.el.prompt) this.el.prompt.textContent = "Alles abgeschlossen!";
       if (this.el.feedback) this.el.feedback.textContent = "🏆 Fertig!";
-      this.updateProgressUI(false);
       return;
     }
 
@@ -476,7 +256,6 @@ class MakerFlowEngine {
       } else {
         if (this.el.prompt) this.el.prompt.textContent = "Curriculum abgeschlossen!";
         if (this.el.feedback) this.el.feedback.textContent = "🏆 Fertig!";
-        this.updateProgressUI(false);
         return;
       }
       this.loadCurrentTask();
@@ -505,25 +284,6 @@ class MakerFlowEngine {
     };
 
     this.renderTask(mod);
-
-    // Update glyph each time we render
-    this.updateProgressUI(false);
-
-    // AR/Layer hook (zero-dep)
-    try {
-      window.dispatchEvent(
-        new CustomEvent("maker:task", {
-          detail: {
-            mode: this.state.mode,
-            mod_id: this.currentTask.mod_id,
-            unit_id: this.currentTask.unit_id,
-            task_type: this.currentTask.task_type,
-            focus_word: this.currentTask.focus_word,
-            scannerTier: this.state.progress.unlocks.scannerTier
-          }
-        })
-      );
-    } catch {}
   }
 
   renderTask(mod) {
@@ -540,6 +300,13 @@ class MakerFlowEngine {
 
     if (this.el.interaction) this.el.interaction.innerHTML = "";
     if (this.el.micBtn) this.el.micBtn.style.display = "none";
+
+    // Tier + event bridge for motor_ar.js
+    const scannerTier = this.getScannerTier();
+    this.applyScannerTierClass(scannerTier);
+    try {
+      window.dispatchEvent(new CustomEvent("maker:task", { detail: { ...t, scannerTier } }));
+    } catch {}
 
     if (t.task_type === "motor") {
       const options = this.buildMotorOptions(mod, t.target_element_id);
@@ -568,6 +335,15 @@ class MakerFlowEngine {
         btn.onclick = () => this.submitResponse(text === "Ja");
         this.el.interaction.appendChild(btn);
       });
+    }
+
+    // motor_ar: keep flow linear with an explicit tap fallback (✅)
+    if (t.task_type === "motor_ar") {
+      const ok = document.createElement("button");
+      ok.className = "cog-btn";
+      ok.textContent = "✅";
+      ok.onclick = () => this.submitResponse(true);
+      this.el.interaction.appendChild(ok);
     }
   }
 
@@ -623,14 +399,14 @@ class MakerFlowEngine {
     const t = this.currentTask;
 
     if (t.task_type === "vocal") {
-      if ((response || "").toLowerCase().trim().includes(t.focus_word.toLowerCase())) {
+      if ((response || "").toLowerCase().trim().includes(String(t.focus_word).toLowerCase())) {
         return { success: true };
       }
       return { success: false, feedback: `Sag: „${t.focus_word}“.` };
     }
 
     if (t.task_type === "motor") {
-      if ((response || "").toLowerCase() === t.target_element_id.toLowerCase()) {
+      if (String(response || "").toLowerCase() === String(t.target_element_id).toLowerCase()) {
         return { success: true };
       }
       return { success: false, feedback: "Daneben." };
@@ -641,10 +417,10 @@ class MakerFlowEngine {
       return { success: false, feedback: "Nochmal schauen." };
     }
 
-    // AR layer reports boolean true, tap fallback can also be true
+    // motor_ar: confirm via boolean true (from motor_ar.js ✅)
     if (t.task_type === "motor_ar") {
       if (response === true) return { success: true };
-      return { success: false, feedback: "Nochmal probieren." };
+      return { success: false, feedback: "Zeig es – dann ✅." };
     }
 
     return { success: false, feedback: "Ungültig." };
@@ -662,9 +438,6 @@ class MakerFlowEngine {
 
     this.state.progress.currentUnitIndex += 1;
     this.saveState();
-
-    // Pulse progress glyph on success
-    this.updateProgressUI(true);
 
     setTimeout(() => this.loadCurrentTask(), 800);
   }
