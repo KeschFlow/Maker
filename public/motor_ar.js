@@ -1,0 +1,266 @@
+/* motor_ar.js
+ * Zero-dep, offline-first AR thin slice.
+ * Symbol-first UI: 📷 to toggle camera, ✅ to confirm (tap fallback).
+ * Tier-gated via body.scanner-tier-X (>=1 enables AR layer for motor_ar tasks).
+ * Comments in English by project rule.
+ */
+
+class MotorARLayer {
+  constructor() {
+    this.enabled = false; // tier gate
+    this.active = false;  // camera running
+    this.lastTask = null;
+
+    this.el = {
+      root: null,
+      video: null,
+      canvas: null,
+      ctx: null,
+      toggleBtn: null,
+      confirmBtn: null
+    };
+
+    this.stream = null;
+    this._raf = null;
+    this._tierPoll = null;
+
+    this.injectStyles();
+    this.mount();
+    this.bind();
+    this.syncTierState();
+  }
+
+  injectStyles() {
+    const id = "maker-motor-ar-style";
+    if (document.getElementById(id)) return;
+
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      #maker-ar {
+        position: absolute;
+        inset: 0;
+        z-index: 80;
+        display: none;
+        pointer-events: none;
+      }
+      #maker-ar.active { display: block; }
+
+      #maker-ar video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      #maker-ar canvas { display: none; }
+
+      #maker-ar .shade {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.18);
+      }
+
+      /* Big touch targets (>=48px) */
+      #maker-ar .btn {
+        pointer-events: auto;
+        position: absolute;
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        border: 0;
+        background: rgba(0,0,0,0.78);
+        color: #fff;
+        font-size: 22px;
+        line-height: 56px;
+        text-align: center;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #maker-ar .btn:active { transform: scale(0.98); }
+
+      #maker-ar .toggle { right: 12px; bottom: 12px; }
+      #maker-ar .confirm { left: 12px; bottom: 12px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        #maker-ar .btn:active { transform: none; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  mount() {
+    const app = document.getElementById("app");
+    if (!app) return;
+
+    const appStyle = window.getComputedStyle(app);
+    if (appStyle.position === "static") app.style.position = "relative";
+
+    const root = document.createElement("div");
+    root.id = "maker-ar";
+
+    const video = document.createElement("video");
+    video.setAttribute("playsinline", "true");
+    video.muted = true;
+    video.autoplay = true;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+    const shade = document.createElement("div");
+    shade.className = "shade";
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "btn toggle";
+    toggleBtn.type = "button";
+    toggleBtn.textContent = "📷";
+    toggleBtn.setAttribute("aria-label", "Scanner");
+
+    const confirmBtn = document.createElement("button");
+    confirmBtn.className = "btn confirm";
+    confirmBtn.type = "button";
+    confirmBtn.textContent = "✅";
+    confirmBtn.setAttribute("aria-label", "Fertig");
+
+    root.appendChild(video);
+    root.appendChild(canvas);
+    root.appendChild(shade);
+    root.appendChild(toggleBtn);
+    root.appendChild(confirmBtn);
+
+    app.appendChild(root);
+
+    this.el.root = root;
+    this.el.video = video;
+    this.el.canvas = canvas;
+    this.el.ctx = ctx;
+    this.el.toggleBtn = toggleBtn;
+    this.el.confirmBtn = confirmBtn;
+  }
+
+  bind() {
+    window.addEventListener("maker:task", (e) => {
+      this.lastTask = e?.detail || null;
+      this.syncTierState(this.lastTask?.scannerTier);
+      this.syncTask(this.lastTask);
+    });
+
+    this._tierPoll = setInterval(() => this.syncTierState(), 1200);
+
+    this.el.toggleBtn?.addEventListener("click", () => {
+      if (!this.enabled) return;
+      if (this.active) this.stop();
+      else this.start();
+    });
+
+    this.el.confirmBtn?.addEventListener("click", () => this.submitFound());
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) this.stop();
+    });
+  }
+
+  getTierFromBody() {
+    const b = document.body;
+    if (!b) return 0;
+    if (b.classList.contains("scanner-tier-3")) return 3;
+    if (b.classList.contains("scanner-tier-2")) return 2;
+    if (b.classList.contains("scanner-tier-1")) return 1;
+    return 0;
+  }
+
+  syncTierState(explicitTier) {
+    const tier = typeof explicitTier === "number" ? explicitTier : this.getTierFromBody();
+    this.enabled = tier >= 1;
+
+    if (!this.enabled) {
+      this.stop();
+      this.hide();
+      return;
+    }
+
+    this.syncTask(this.lastTask);
+  }
+
+  syncTask(task) {
+    const isMotorAR = task?.task_type === "motor_ar";
+    if (this.enabled && isMotorAR) this.show();
+    else {
+      this.stop();
+      this.hide();
+    }
+  }
+
+  show() { this.el.root?.classList.add("active"); }
+  hide() { this.el.root?.classList.remove("active"); }
+
+  async start() {
+    if (!this.el.video) return;
+    if (this.active) return;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false
+      });
+
+      this.stream = stream;
+      this.el.video.srcObject = stream;
+      this.active = true;
+      this.startLoop();
+    } catch {
+      this.active = false;
+    }
+  }
+
+  stop() {
+    this.active = false;
+    if (this._raf) cancelAnimationFrame(this._raf);
+    this._raf = null;
+
+    if (this.el.video) {
+      try { this.el.video.pause(); } catch {}
+      this.el.video.srcObject = null;
+    }
+
+    if (this.stream) {
+      try { this.stream.getTracks().forEach((t) => t.stop()); } catch {}
+      this.stream = null;
+    }
+  }
+
+  startLoop() {
+    const tick = () => {
+      if (!this.active || !this.el.video || !this.el.canvas || !this.el.ctx) return;
+
+      const v = this.el.video;
+      const w = v.videoWidth || 0;
+      const h = v.videoHeight || 0;
+
+      if (w > 0 && h > 0) {
+        const targetW = 160;
+        const scale = targetW / w;
+        const targetH = Math.max(1, Math.round(h * scale));
+
+        this.el.canvas.width = targetW;
+        this.el.canvas.height = targetH;
+
+        this.el.ctx.drawImage(v, 0, 0, targetW, targetH);
+      }
+
+      this._raf = requestAnimationFrame(tick);
+    };
+
+    this._raf = requestAnimationFrame(tick);
+  }
+
+  submitFound() {
+    const engine = window.makerEngine;
+    if (engine && typeof engine.submitResponse === "function") {
+      engine.submitResponse(true);
+    }
+  }
+}
+
+new MotorARLayer();
