@@ -2,138 +2,48 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MAKER – Polytechnische Einheitsschule</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#000000" />
-  <meta name="color-scheme" content="dark light" />
-
-  <!-- PWA -->
   <link rel="manifest" href="./manifest.json" />
-
-  <!-- iOS PWA basics (no external deps) -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
+  <title>MAKER</title>
   <link rel="stylesheet" href="./app.css" />
 </head>
-
 <body>
-  <noscript>
-    <div style="padding:16px; font-family: system-ui, sans-serif; line-height:1.4;">
-      <strong>MAKER braucht JavaScript.</strong><br />
-      Bitte aktiviere JavaScript oder öffne die App in einem Browser, der es unterstützt.
-    </div>
-  </noscript>
 
-  <!-- Gatekeeper (linear entry) -->
-  <div id="gatekeeper" class="hidden" aria-live="polite">
-    <div class="brand">MAKER</div>
-    <div class="sub-brand">Polytechnische Einheitsschule</div>
+  <!-- App Container -->
+  <div id="app" role="application" aria-label="MAKER Lernsystem"></div>
 
-    <button
-      id="mode-btn-gate"
-      class="pill mode-btn"
-      type="button"
-      aria-label="Modus wechseln"
-      title="Modus"
-    >🌍</button>
+  <!-- AR Layer -->
+  <div id="ar-layer" hidden></div>
 
-    <div id="start-circle" aria-hidden="true"></div>
-
-    <div id="gate-prompt" role="button" tabindex="0">Sag „Start“ oder tippe</div>
-
-    <button
-      id="gate-fallback-btn"
-      class="pill big-start"
-      type="button"
-      aria-label="Start"
-      title="Start"
-    >
-      👆 Start
-    </button>
-  </div>
-
-  <!-- App shell (AR layer mounts inside #app by motor_ar.js) -->
-  <div id="app" class="hidden">
-    <div class="topbar">
-      <button
-        id="mode-btn-app"
-        class="pill mode-btn"
-        type="button"
-        aria-label="Modus wechseln"
-        title="Modus"
-      >🌍</button>
-
-      <button
-        id="reset-btn"
-        class="pill danger"
-        type="button"
-        aria-label="Zurücksetzen"
-        title="Reset"
-      >🔄 Reset</button>
-    </div>
-
-    <div id="core-display">
-      <div id="concept-image"></div>
-      <div id="focus-word"></div>
-    </div>
-
-    <div id="prompt" aria-live="polite"></div>
-
-    <div id="interaction-area"></div>
-
-    <button
-      id="mic-button"
-      type="button"
-      aria-label="Sprechen"
-      title="Sprechen"
-      style="display:none;"
-    >🎤 Sprechen</button>
-
-    <div id="feedback" aria-live="polite"></div>
-    <div id="diagnostic" style="display:none;"></div>
-  </div>
-
-  <!-- ✅ Script order is CRITICAL -->
-  <script src="./app.js" defer></script>
-  <script src="./motor_ar.js" defer></script>
+  <script src="./app.js"></script>
 
   <script>
-    // a11y-gate.js (inline): keyboard fallback for the gate prompt
-    // Comments in English by project rule.
+    // Service Worker Registration (robust & offline-safe)
     (function () {
-      var gp = document.getElementById("gate-prompt");
-      if (!gp) return;
+      if (!("serviceWorker" in navigator)) {
+        console.warn("Service Worker not supported.");
+        return;
+      }
 
-      gp.addEventListener("keydown", function (e) {
-        var k = e.key || "";
-        if (k === "Enter" || k === " " || k === "Spacebar") {
-          e.preventDefault();
-          gp.click();
-        }
+      // HTTPS required except localhost
+      const isLocalhost = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+      if (location.protocol !== "https:" && !isLocalhost) {
+        console.warn("Service Worker requires HTTPS.");
+        return;
+      }
+
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./sw.js")
+          .then(function (registration) {
+            console.log("SW registered:", registration.scope);
+          })
+          .catch(function (error) {
+            console.error("SW registration failed:", error);
+          });
       });
     })();
   </script>
 
-  <script>
-    // sw-register.js (inline): offline-first + update-safe behavior
-    // Comments in English by project rule.
-    (function () {
-      if (!("serviceWorker" in navigator)) return;
-
-      navigator.serviceWorker.register("./sw.js", { scope: "./" })
-        .then(function () {})
-        .catch(function () {});
-
-      // Reload once when the new SW takes control to avoid "stuck old version"
-      var reloaded = false;
-      navigator.serviceWorker.addEventListener("controllerchange", function () {
-        if (reloaded) return;
-        reloaded = true;
-        location.reload();
-      });
-    })();
-  </script>
 </body>
 </html>
